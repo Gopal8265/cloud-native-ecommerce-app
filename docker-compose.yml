@@ -1,0 +1,36 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: ecommerce-db
+    restart: always
+    environment:
+      POSTGRES_USER: gopal
+      POSTGRES_PASSWORD: password123
+      POSTGRES_DB: ecommerce_db
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  backend:
+    build:
+      context: ./backend
+    container_name: ecommerce-backend
+    restart: always
+    depends_on:
+      - postgres
+    ports:
+      - "5050:5050"
+    environment:
+      PORT: 5050
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: gopal
+      DB_PASSWORD: password123
+      DB_NAME: ecommerce_db
+      JWT_SECRET: your_super_secret_key
+
+volumes:
+  postgres_data:
