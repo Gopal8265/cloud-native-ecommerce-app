@@ -14,11 +14,17 @@ pipeline {
             }
         }
 
-        stage('Build Docker Image') {
+        stage('Check Environment') {
             steps {
-                sh '/usr/local/bin/docker compose build'
+                sh '''
+                echo "PATH=$PATH"
+                which docker
+                which docker-credential-desktop
+                docker --version
+                docker compose version
+                '''
             }
-        }
+     }
 
         stage('Deploy Application') {
             steps {
