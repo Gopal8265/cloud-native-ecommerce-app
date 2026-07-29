@@ -4,6 +4,7 @@ pipeline {
     environment {
         IMAGE_NAME = "cloud-native-ecommerce-app-backend"
         CONTAINER_NAME = "ecommerce-backend"
+        PATH = "/usr/local/bin:/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin"
     }
 
     stages {
@@ -14,30 +15,30 @@ pipeline {
             }
         }
 
-        stage('Check Environment') {
+        stage('Build Docker Image') {
             steps {
                 sh '''
-                echo "PATH=$PATH"
-                which docker
-                which docker-credential-desktop
                 docker --version
-                docker compose version
+                docker compose build
                 '''
             }
-     }
+        }
 
         stage('Deploy Application') {
             steps {
                 sh '''
-                /usr/local/bin/docker compose down || true
-                /usr/local/bin/docker compose up -d
+                docker compose down || true
+                docker compose up -d --build
                 '''
             }
         }
 
         stage('Verify Deployment') {
             steps {
-                sh '/usr/local/bin/docker ps'
+                sh '''
+                docker ps
+                docker compose ps
+                '''
             }
         }
     }
@@ -49,6 +50,10 @@ pipeline {
 
         failure {
             echo 'Deployment failed.'
+        }
+
+        always {
+            cleanWs()
         }
     }
 }
