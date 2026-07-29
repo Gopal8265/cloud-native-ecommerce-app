@@ -16,22 +16,22 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                sh 'docker compose build'
+                sh '/usr/local/bin/docker compose build'
             }
         }
 
         stage('Deploy Application') {
             steps {
                 sh '''
-                docker compose down || true
-                docker compose up -d
+                /usr/local/bin/docker compose down || true
+                /usr/local/bin/docker compose up -d
                 '''
             }
         }
 
         stage('Verify Deployment') {
             steps {
-                sh 'docker ps'
+                sh '/usr/local/bin/docker ps'
             }
         }
     }
