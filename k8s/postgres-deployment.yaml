@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ecommerce-postgres
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ecommerce-postgres
+  template:
+    metadata:
+      labels:
+        app: ecommerce-postgres
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:15
+
+          ports:
+            - containerPort: 5432
+
+          env:
+            - name: POSTGRES_DB
+              valueFrom:
+                configMapKeyRef:
+                  name: ecommerce-config
+                  key: DB_NAME
+
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: ecommerce-secret
+                  key: DB_USER
+
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: ecommerce-secret
+                  key: DB_PASSWORD
+
+          volumeMounts:
+            # PostgreSQL data
+            - name: postgres-storage
+              mountPath: /var/lib/postgresql/data
+
+            # Schema initialization
+            - name: schema-volume
+              mountPath: /docker-entrypoint-initdb.d
+
+      volumes:
+        - name: postgres-storage
+          persistentVolumeClaim:
+            claimName: ecommerce-postgres-pvc
+
+        - name: schema-volume
+          configMap:
+            name: ecommerce-schema

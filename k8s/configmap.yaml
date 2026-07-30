@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ecommerce-config
+data:
+  PORT: "5050"
+  DB_HOST: ecommerce-postgres-service
+  DB_PORT: "5432"
+  DB_NAME: ecommerce_db
