@@ -2,10 +2,17 @@ const pool = require("../config/db");
 
 // Add Product to Cart
 const addToCart = async (userId, productId, quantity) => {
+  console.log("========== CART SERVICE ==========");
+  console.log("Received Product ID:", productId);
+  console.log("Received User ID:", userId);
+  console.log("Received Quantity:", quantity);
+
   const product = await pool.query(
     "SELECT * FROM products WHERE id = $1",
     [productId]
   );
+
+  console.log("Product Query Result:", product.rows);
 
   if (product.rows.length === 0) {
     throw new Error("Product not found");

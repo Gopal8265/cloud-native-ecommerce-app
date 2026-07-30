@@ -2,8 +2,11 @@ pipeline {
     agent any
 
     environment {
-        IMAGE_NAME = "cloud-native-ecommerce-app-backend"
-        CONTAINER_NAME = "ecommerce-backend"
+        DOCKER_USERNAME = "gopal82"
+
+        BACKEND_IMAGE = "${DOCKER_USERNAME}/ecommerce-backend"
+        FRONTEND_IMAGE = "${DOCKER_USERNAME}/ecommerce-frontend"
+
         PATH = "/usr/local/bin:/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin"
     }
 
@@ -15,11 +18,43 @@ pipeline {
             }
         }
 
-        stage('Build Docker Image') {
+        stage('Build Backend Image') {
             steps {
                 sh '''
-                docker --version
-                docker compose build
+                docker build -t $BACKEND_IMAGE:latest ./backend
+                '''
+            }
+        }
+
+        stage('Build Frontend Image') {
+            steps {
+                sh '''
+                docker build -t $FRONTEND_IMAGE:latest ./frontend
+                '''
+            }
+        }
+
+        stage('Docker Login') {
+            steps {
+                withCredentials([
+                    usernamePassword(
+                        credentialsId: 'dockerhub-creds',
+                        usernameVariable: 'DOCKER_USER',
+                        passwordVariable: 'DOCKER_PASS'
+                    )
+                ]) {
+                    sh '''
+                    echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+                    '''
+                }
+            }
+        }
+
+        stage('Push Images') {
+            steps {
+                sh '''
+                docker push $BACKEND_IMAGE:latest
+                docker push $FRONTEND_IMAGE:latest
                 '''
             }
         }
@@ -28,7 +63,7 @@ pipeline {
             steps {
                 sh '''
                 docker compose down || true
-                docker compose up -d --build
+                docker compose up -d
                 '''
             }
         }
@@ -41,15 +76,23 @@ pipeline {
                 '''
             }
         }
+
+        stage('Cleanup') {
+            steps {
+                sh '''
+                docker image prune -f
+                '''
+            }
+        }
     }
 
     post {
         success {
-            echo 'Deployment completed successfully!'
+            echo 'Pipeline completed successfully!'
         }
 
         failure {
-            echo 'Deployment failed.'
+            echo 'Pipeline failed.'
         }
 
         always {
