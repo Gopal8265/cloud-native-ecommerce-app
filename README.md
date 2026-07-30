@@ -225,4 +225,3 @@ Gopal Sahu
 B.Tech Mechanical Engineering
 
 Aspiring DevOps & Data Engineer
-## CI/CD Pipeline Enabled
