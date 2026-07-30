@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ecommerce-frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ecommerce-frontend
+
+  template:
+    metadata:
+      labels:
+        app: ecommerce-frontend
+
+    spec:
+      containers:
+      - name: ecommerce-frontend
+        image: gopal82/ecommerce-frontend:latest
+        imagePullPolicy: Always
+
+        ports:
+        - containerPort: 80
